@@ -19,7 +19,7 @@ package net.fabricmc.loader.impl.metadata
 
 import com.beust.klaxon.Klaxon
 import com.beust.klaxon.JsonReader
-//import com.moltenex.loader.impl.metadata.fabric.FabricV1ModMetadataParser
+//import com.moltenex.loader.impl.metadata.fabric.OutdatedFabricV1ModMetadataParser
 import com.moltenex.loader.impl.metadata.fabric.FabricV0ModMetadataParser
 import net.fabricmc.loader.impl.util.log.Log
 import net.fabricmc.loader.impl.util.log.LogCategory
@@ -76,7 +76,7 @@ object ModMetadataParser {
 
         // Parse the mod metadata using the detected schema version
         return when (schemaVersion) {
-            //1 -> FabricV1ModMetadataParser.parse(jsonReader)
+            //1 -> OutdatedFabricV1ModMetadataParser.parse(jsonReader)
             0 -> {
                 // For version 0, we need to pass the JSON reader to the V0 parser
                 FabricV0ModMetadataParser.parse(jsonReader)

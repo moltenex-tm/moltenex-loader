@@ -25,11 +25,11 @@ import net.fabricmc.loader.api.VersionParsingException
 object VersionParser {
     @Throws(VersionParsingException::class)
     fun parse(s: String?, storeX: Boolean): Version {
-        if (s == null || s.isEmpty()) {
+        if (s.isNullOrEmpty()) {
             throw VersionParsingException("Version must be a non-empty string!")
         }
 
-        var version: Version = try {
+        val version: Version = try {
             SemanticVersionImpl(s, storeX)
         } catch (e: VersionParsingException) {
             StringVersion(s)
@@ -40,7 +40,7 @@ object VersionParser {
 
     @Throws(VersionParsingException::class)
     fun parseSemantic(s: String?): SemanticVersion {
-        if (s == null || s.isEmpty()) {
+        if (s.isNullOrEmpty()) {
             throw VersionParsingException("Version must be a non-empty string!")
         }
 

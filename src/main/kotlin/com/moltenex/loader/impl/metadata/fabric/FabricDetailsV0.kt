@@ -17,13 +17,12 @@
 */
 package com.moltenex.loader.impl.metadata.fabric
 
-import com.beust.klaxon.TypeFor
 import com.moltenex.loader.api.util.version.Version
 
 data class FabricDetailsV0(
     val schemaVersion: Number,
     val id: String,
-    val version: Version,
+    val version: String,
     val dependencyHandler: DependenciesContainer,
     val conflicts: DependenciesContainer,
     val mixins: Mixins,

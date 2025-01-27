@@ -20,6 +20,5 @@ package com.moltenex.loader.impl.metadata.fabric
 import net.fabricmc.loader.impl.metadata.ModDependencyImpl
 
 data class DependenciesContainer(
-
     val dependencies: MutableList<ModDependencyImpl>
 )

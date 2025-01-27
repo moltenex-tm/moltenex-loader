@@ -25,6 +25,7 @@ import net.fabricmc.loader.api.metadata.Person
 import net.fabricmc.loader.impl.metadata.*
 import net.fabricmc.loader.impl.metadata.ContactInfoBackedPerson
 import net.fabricmc.loader.impl.metadata.V0ModMetadata
+import net.fabricmc.loader.impl.util.version.VersionParser
 import java.io.IOException
 import java.util.regex.Pattern
 
@@ -53,7 +54,7 @@ internal object FabricV0ModMetadataParser {
         val license = metadata.license
         return V0ModMetadata(
             id,
-            version,
+            VersionParser.parse(version,false),
             dependencies,
             mixins(metadata),
             environment,
