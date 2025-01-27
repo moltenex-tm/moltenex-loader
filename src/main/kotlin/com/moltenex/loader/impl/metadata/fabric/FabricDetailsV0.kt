@@ -17,8 +17,6 @@
 */
 package com.moltenex.loader.impl.metadata.fabric
 
-import com.moltenex.loader.api.util.version.Version
-
 data class FabricDetailsV0(
     val schemaVersion: Number,
     val id: String,

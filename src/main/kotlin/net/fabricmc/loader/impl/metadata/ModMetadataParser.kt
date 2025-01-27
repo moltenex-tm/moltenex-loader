@@ -41,7 +41,7 @@ object ModMetadataParser {
         versionOverrides: VersionOverrides, depOverrides: DependencyOverrides, isDevelopment: Boolean
     ): LoaderModMetadata {
         try {
-            val ret = readModMetadata(`is`, isDevelopment)
+            val ret = readModMetadata(`is`)
 
             versionOverrides.apply(ret)
             depOverrides.apply(ret)
@@ -60,7 +60,7 @@ object ModMetadataParser {
     }
 
     @Throws(IOException::class, ParseMetadataException::class)
-    private fun readModMetadata(`is`: InputStream, isDevelopment: Boolean): LoaderModMetadata {
+    private fun readModMetadata(`is`: InputStream): LoaderModMetadata {
         // Read the input stream as a string for Klaxon parsing
         val json = String(`is`.readBytes(), StandardCharsets.UTF_8)
 
