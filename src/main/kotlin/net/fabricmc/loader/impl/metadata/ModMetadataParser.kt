@@ -17,10 +17,8 @@
 */
 package net.fabricmc.loader.impl.metadata
 
-import com.beust.klaxon.Klaxon
-import com.beust.klaxon.JsonReader
-//import com.moltenex.loader.impl.metadata.fabric.OutdatedFabricV1ModMetadataParser
-import com.moltenex.loader.impl.metadata.fabric.FabricV0ModMetadataParser
+import kotlinx.serialization.*
+import kotlinx.serialization.json.*
 import net.fabricmc.loader.impl.util.log.Log
 import net.fabricmc.loader.impl.util.log.LogCategory
 import java.io.IOException
@@ -61,25 +59,22 @@ object ModMetadataParser {
 
     @Throws(IOException::class, ParseMetadataException::class)
     private fun readModMetadata(`is`: InputStream): LoaderModMetadata {
-        // Read the input stream as a string for Klaxon parsing
+        // Read the input stream as a string
         val json = String(`is`.readBytes(), StandardCharsets.UTF_8)
 
-        // Parse the JSON with Klaxon
-        val klaxonJson = Klaxon().parseJsonObject(json.reader())
-
-        // Now we need to convert Klaxon parsed data to a JsonReader
-        val stringReader = json.reader()
-        val jsonReader = JsonReader(stringReader)
+        // Parse the JSON using Kotlin Serialization
+        val jsonElement = Json.parseToJsonElement(json)
 
         // Try to extract schemaVersion from the parsed object
-        val schemaVersion = klaxonJson["schemaVersion"] as? Int ?: 0
+        val schemaVersion = jsonElement.jsonObject["schemaVersion"]?.jsonPrimitive?.int ?: 0
 
         // Parse the mod metadata using the detected schema version
         return when (schemaVersion) {
-            //1 -> OutdatedFabricV1ModMetadataParser.parse(jsonReader)
+            1 -> {
+                com.moltenex.loader.impl.metadata.fabric.v1.ModMetadataParser.parse(jsonElement)
+            }
             0 -> {
-                // For version 0, we need to pass the JSON reader to the V0 parser
-                FabricV0ModMetadataParser.parse(jsonReader)
+                com.moltenex.loader.impl.metadata.fabric.v0.ModMetadataParser.parse(jsonElement)
             }
             else -> {
                 if (schemaVersion > 0) {

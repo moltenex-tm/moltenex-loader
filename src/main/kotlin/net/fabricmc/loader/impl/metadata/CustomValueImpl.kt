@@ -16,10 +16,12 @@
  *
 */
 package net.fabricmc.loader.impl.metadata
-import com.beust.klaxon.Klaxon
-import com.beust.klaxon.JsonObject
-import com.beust.klaxon.JsonArray
+
+import kotlinx.serialization.json.*
 import net.fabricmc.loader.api.metadata.CustomValue
+import net.fabricmc.loader.impl.metadata.CustomValueImpl.NullImpl.isBoolean
+import net.fabricmc.loader.impl.metadata.CustomValueImpl.NullImpl.isNumber
+import net.fabricmc.loader.impl.metadata.CustomValueImpl.NullImpl.isString
 import okio.IOException
 
 sealed class CustomValueImpl : CustomValue {
@@ -30,28 +32,45 @@ sealed class CustomValueImpl : CustomValue {
         val NULL: CustomValue = NullImpl
 
         @Throws(IOException::class, ParseMetadataException::class)
-        fun readCustomValue(json: Any): CustomValue {
+        fun readCustomValue(json: JsonElement): CustomValue {
             return when (json) {
                 is JsonObject -> {
                     val values = linkedMapOf<String, CustomValue>()
                     json.forEach { (key, value) ->
-                        values[key] = readCustomValue(value!!)
+                        values[key] = readCustomValue(value)
                     }
                     ObjectImpl(values)
                 }
-                is JsonArray<*> -> {
+                is JsonArray -> {
                     val entries = mutableListOf<CustomValue>()
                     json.forEach { value ->
-                        entries.add(readCustomValue(value!!))
+                        entries.add(readCustomValue(value))
                     }
                     ArrayImpl(entries)
                 }
-                is String -> StringImpl(json)
-                is Number -> NumberImpl(json)
-                is Boolean -> if (json) BOOLEAN_TRUE else BOOLEAN_FALSE
+                is JsonPrimitive -> {
+                    when {
+                        json.isString() -> StringImpl(json.content)
+                        json.isNumber() -> NumberImpl(json.double)
+                        json.isBoolean() -> BOOLEAN_TRUE
+                        else -> BOOLEAN_FALSE
+                    }
+                }
                 else -> NULL
             }
         }
+
+    }
+    fun JsonElement.isString(): Boolean{
+        return this is JsonPrimitive && this.isString()
+    }
+
+    fun JsonElement.isNumber(): Boolean {
+        return this is JsonPrimitive && this.isNumber()
+    }
+
+    fun JsonElement.isBoolean(): Boolean {
+        return this is JsonPrimitive && this.isBoolean()
     }
 
     override fun getAsObject(): CustomValue.CvObject {

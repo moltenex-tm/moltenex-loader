@@ -17,18 +17,16 @@
 */
 package net.fabricmc.loader.impl.metadata
 
-import com.beust.klaxon.JsonReader
+import kotlinx.serialization.SerializationException
 
-open class ParseMetadataException : Exception {
+open class ParseMetadataException : SerializationException {
     private var modPaths: MutableList<String>? = null
 
     constructor(message: String?) : super(message)
 
-    constructor(message: String, exception: JsonReader) : this(
+    constructor(message: String, exception: Throwable) : this(
         "$message Error was located at: $exception"
     )
-
-    constructor(message: String?, throwable: Throwable?) : super(message, throwable)
 
     constructor(t: Throwable?) : super(t)
 

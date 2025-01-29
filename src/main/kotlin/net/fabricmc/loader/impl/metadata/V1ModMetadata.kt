@@ -19,12 +19,14 @@ package net.fabricmc.loader.impl.metadata
 
 import net.fabricmc.api.EnvType
 import com.moltenex.loader.api.util.version.Version
+import com.moltenex.loader.impl.metadata.fabric.serializers.MixinEntrySerializer
+import kotlinx.serialization.Serializable
 import net.fabricmc.loader.api.metadata.*
 import net.fabricmc.loader.impl.util.log.Log
 import net.fabricmc.loader.impl.util.log.LogCategory
 import java.util.*
 
-internal class V1ModMetadata(// Required values
+class V1ModMetadata(// Required values
     override val id: String,
     override var version: Version?,
     provides: Collection<String>,
@@ -32,8 +34,8 @@ internal class V1ModMetadata(// Required values
     entrypoints: Map<String, List<EntrypointMetadata?>>,
     jars: Collection<NestedJarEntry>,
     mixins: Collection<MixinEntry>,
-    override val accessWidener: String,
-    dependencies: Collection<ModDependency?>, // Happy little accidents
+    override val accessWidener: String?,
+    dependencies: Collection<ModDependency?>,
     private val hasRequires: Boolean,
     name: String?,
     description: String?,
@@ -163,9 +165,10 @@ internal class V1ModMetadata(// Required values
 
     internal class JarEntry(override val file: String) : NestedJarEntry
 
-    internal class MixinEntry(val config: String, val environment: ModEnvironment)
+    @Serializable(with = MixinEntrySerializer::class)
+    class MixinEntry(val config: String, val environment: ModEnvironment)
 
-    internal fun interface IconEntry {
+    fun interface IconEntry {
         fun getIconPath(size: Int): Optional<String>
     }
 

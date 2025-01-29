@@ -15,15 +15,18 @@
  * please refer to the full License document.
  *
 */
-package net.fabricmc.loader.impl.metadata
+package com.moltenex.loader.impl.metadata.fabric.v0
 
-import net.fabricmc.loader.api.metadata.ContactInformation
-import net.fabricmc.loader.api.metadata.Person
+import com.moltenex.loader.impl.metadata.fabric.serializers.MixinsSerializer
+import kotlinx.serialization.*
+import java.util.*
 
-/**
- * Represents a simple implementation of person which is only identified by name.
- */
-open class SimplePerson(override val name: String) : Person {
-    override val contact: ContactInformation
-        get() = ContactInformation.EMPTY
+@Serializable(with = MixinsSerializer::class)
+class Mixins(client: Collection<String?>, common: Collection<String?>, server: Collection<String?>) {
+    val client: Collection<String?> =
+        Collections.unmodifiableCollection(client)
+    val common: Collection<String?> =
+        Collections.unmodifiableCollection(common)
+    val server: Collection<String?> =
+        Collections.unmodifiableCollection(server)
 }

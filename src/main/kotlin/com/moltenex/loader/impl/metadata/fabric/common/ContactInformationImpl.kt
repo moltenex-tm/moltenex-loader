@@ -15,15 +15,23 @@
  * please refer to the full License document.
  *
 */
-package net.fabricmc.loader.impl.metadata
+package com.moltenex.loader.impl.metadata.fabric.common
 
+import com.moltenex.loader.impl.metadata.fabric.serializers.ContactInformationSerializer
+import kotlinx.serialization.Serializable
 import net.fabricmc.loader.api.metadata.ContactInformation
-import net.fabricmc.loader.api.metadata.Person
+import java.util.*
 
-/**
- * Represents a simple implementation of person which is only identified by name.
- */
-open class SimplePerson(override val name: String) : Person {
-    override val contact: ContactInformation
-        get() = ContactInformation.EMPTY
+@Serializable(with = ContactInformationSerializer::class)
+class ContactInformationImpl(map: Map<String, String>) : ContactInformation {
+    private val map: Map<String, String> =
+        Collections.unmodifiableMap(map)
+
+    override fun get(key: String?): Optional<String> {
+        return Optional.ofNullable(map[key])
+    }
+
+    override fun asMap(): Map<String, String> {
+        return map
+    }
 }

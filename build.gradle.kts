@@ -16,6 +16,7 @@ buildscript {
 
 plugins{
     kotlin("jvm") version "latest.release"
+    kotlin("plugin.serialization") version "latest.release"
     id("java")
     id("java-library")
     id("eclipse")
@@ -64,6 +65,8 @@ allprojects {
     dependencies {
         implementation(kotlin("stdlib"))
         implementation("com.squareup.okio:okio:latest.release")
+        implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:latest.release")
+        implementation("org.jetbrains.kotlinx:kotlinx-serialization-core:latest.release")
     }
 
     // Checkstyle configuration
@@ -74,13 +77,11 @@ allprojects {
 
     // Spotless configuration
     spotless {
-        if(project != project(":json")|| project != project("jackson")) {
-            kotlin {
-                licenseHeaderFile(rootProject.file("HEADER"))
-            }
-            java {
-                licenseHeaderFile(rootProject.file("HEADER"))
-            }
+        kotlin {
+            licenseHeaderFile(rootProject.file("HEADER"))
+        }
+        java {
+            licenseHeaderFile(rootProject.file("HEADER"))
         }
     }
 }
@@ -144,13 +145,14 @@ dependencies {
     "development"("io.github.llamalad7:mixinextras-fabric:${project.findProperty("mixin_extras_version")}")
 
     testCompileOnly("org.jetbrains:annotations:23.0.0")
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:latest.release")
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-core:latest.release")
 
     // Unit testing for mod metadata
     testImplementation("org.junit.jupiter:junit-jupiter:5.9.2")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 
     testImplementation("org.mockito:mockito-core:5.10.0")
-    implementation(project(":json"))
 }
 
 apply(from = rootProject.file("gradle/installer-json.gradle"))

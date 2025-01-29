@@ -17,16 +17,20 @@
 */
 package net.fabricmc.loader.impl.metadata
 
-import com.beust.klaxon.Klaxon
+import com.moltenex.loader.impl.metadata.fabric.common.ModDependencyImpl
+import kotlinx.serialization.*
+import kotlinx.serialization.json.*
 import net.fabricmc.loader.api.metadata.ModDependency
-import net.fabricmc.loader.impl.metadata.ParseMetadataException
 import java.io.IOException
 import java.nio.file.Files
 import java.nio.file.Path
 import java.util.*
 
-class DependencyOverrides(configDir: Path) {
-    private var dependencyOverrides: Map<String?, List<Entry>>? = null
+@Serializable
+data class DependencyOverrides(
+    private val configDir: Path
+) {
+    private var dependencyOverrides: Map<String, List<Entry>>? = null
 
     init {
         val path = configDir.resolve("fabric_loader_dependencies.json")
@@ -38,11 +42,10 @@ class DependencyOverrides(configDir: Path) {
 
         try {
             val jsonContent = String(Files.readAllBytes(path))
-            dependencyOverrides = (Klaxon().parse<Map<String, List<Entry>>>(jsonContent)
-                ?: throw ParseMetadataException("Failed to parse JSON file", null)) as Map<String?, List<Entry>>?
+            dependencyOverrides = parseJson(jsonContent)
         } catch (e: IOException) {
             throw IOException("Failed to read the configuration file", e)
-        } catch (e: ParseMetadataException) {
+        } catch (e: SerializationException) {
             throw ParseMetadataException("Failed to parse the configuration file", e)
         }
     }
@@ -95,8 +98,14 @@ class DependencyOverrides(configDir: Path) {
     val affectedModIds: Collection<String?>
         get() = dependencyOverrides!!.keys
 
-    private data class Entry(val operation: Operation, val kind: ModDependency.Kind, val values: List<ModDependency>)
+    @Serializable // Ensure the Entry class is serializable
+    private data class Entry(
+        val operation: Operation,
+        val kind: ModDependency.Kind,
+        val values: List<ModDependency>
+    )
 
+    @Serializable // Ensure the Operation enum is serializable
     private enum class Operation(val operator: String) {
         ADD("+"),
         REMOVE("-"),
@@ -107,67 +116,59 @@ class DependencyOverrides(configDir: Path) {
         }
     }
 
-    companion object {
-        @Throws(ParseMetadataException::class, IOException::class)
-        private fun parse(reader: String): Map<String?, List<Entry>> {
-            // Use Klaxon for JSON parsing directly
-            val parsedData = Klaxon().parse<Map<String, Any>>(reader)
-                ?: throw ParseMetadataException("Invalid JSON format", null)
+    private fun parseJson(reader: String): Map<String, List<Entry>> {
+        val parsedData = Json.decodeFromString<JsonObject>(reader)
 
-            val ret: MutableMap<String?, List<Entry>> = mutableMapOf()
-
-            val version = parsedData["version"] as? Int
-            if (version != 1) {
-                throw ParseMetadataException("Unsupported version, must be 1", null)
-            }
-
-            val overrides = parsedData["overrides"] as? Map<String, Any>
-            overrides?.forEach { (modId, overridesData) ->
-                val overridesList = readKeys(overridesData)
-                ret[modId] = overridesList
-            }
-
-            return ret
+        val version = parsedData["version"]?.jsonPrimitive?.int
+        if (version != 1) {
+            throw ParseMetadataException("Unsupported version, must be 1")
         }
 
-        @Throws(IOException::class, ParseMetadataException::class)
-        private fun readKeys(overridesData: Any): List<Entry> {
-            val modOverrides = mutableMapOf<ModDependency.Kind, MutableMap<Operation, List<ModDependency>>>()
+        val overrides = parsedData["overrides"]?.jsonObject
+        val ret: MutableMap<String, List<Entry>> = mutableMapOf()
 
-            if (overridesData is Map<*, *>) {
-                for ((key, value) in overridesData) {
-                    var op: Operation? = null
-                    var kind: ModDependency.Kind? = null
+        overrides?.forEach { (modId, overridesData) ->
+            val overridesList = readKeys(overridesData)
+            ret[modId] = overridesList
+        }
 
-                    if (key is String) {
-                        for (operation in Operation.VALUES) {
-                            if (key.startsWith(operation.operator)) {
-                                op = operation
-                                val kindKey = key.substring(operation.operator.length)
-                                kind = ModDependency.Kind.entries.find { it.key == kindKey }
-                                break
-                            }
-                        }
+        return ret
+    }
+
+    private fun readKeys(overridesData: JsonElement): List<Entry> {
+        val modOverrides = mutableMapOf<ModDependency.Kind, MutableMap<Operation, List<ModDependency>>>()
+
+        if (overridesData is JsonObject) {
+            for ((key, value) in overridesData) {
+                var op: Operation? = null
+                var kind: ModDependency.Kind? = null
+
+                for (operation in Operation.VALUES) {
+                    if (key.startsWith(operation.operator)) {
+                        op = operation
+                        val kindKey = key.substring(operation.operator.length)
+                        kind = ModDependency.Kind.entries.find { it.key == kindKey }
+                        break
                     }
+                }
 
-                    if (op == null || kind == null) {
-                        throw ParseMetadataException("Invalid dependency key: $key", null)
-                    }
+                if (op == null || kind == null) {
+                    throw ParseMetadataException("Invalid dependency key: $key")
+                }
 
-                    if (value is List<*>) {
-                        val deps = value.map { it as Map<*, *> }
-                            .map { modDep ->
-                                ModDependencyImpl(kind, modDep["modId"] as String, modDep["version"] as List<String>)
-                            }
-                        modOverrides.computeIfAbsent(kind) { EnumMap(Operation::class.java) }[op] = deps
+                if (value is JsonArray) {
+                    val deps = value.map { modDep ->
+                        val modDepObj = modDep.jsonObject
+                        ModDependencyImpl(kind, modDepObj["modId"]!!.jsonPrimitive.content, modDepObj["version"]!!.jsonArray.map { it.jsonPrimitive.content })
                     }
+                    modOverrides.computeIfAbsent(kind) { EnumMap(Operation::class.java) }[op] = deps
                 }
             }
+        }
 
-            return modOverrides.flatMap { (kind, operations) ->
-                operations.flatMap { (operation, dependencies) ->
-                    listOf(Entry(operation, kind, dependencies))
-                }
+        return modOverrides.flatMap { (kind, operations) ->
+            operations.flatMap { (operation, dependencies) ->
+                listOf(Entry(operation, kind, dependencies))
             }
         }
     }

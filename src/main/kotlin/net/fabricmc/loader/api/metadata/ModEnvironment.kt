@@ -17,8 +17,11 @@
 */
 package net.fabricmc.loader.api.metadata
 
+import com.moltenex.loader.impl.metadata.fabric.serializers.ModEnvironmentSerializer
+import kotlinx.serialization.Serializable
 import net.fabricmc.api.EnvType
 
+@Serializable(with = ModEnvironmentSerializer::class)
 enum class ModEnvironment {
     CLIENT,
     SERVER,

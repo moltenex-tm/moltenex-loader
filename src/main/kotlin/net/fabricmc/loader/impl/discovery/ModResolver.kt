@@ -17,6 +17,7 @@
 */
 package net.fabricmc.loader.impl.discovery
 
+import com.moltenex.loader.impl.metadata.fabric.common.ModDependencyImpl
 import net.fabricmc.api.EnvType
 import net.fabricmc.loader.api.metadata.ModDependency
 import net.fabricmc.loader.impl.discovery.ModPrioSorter.sort
@@ -25,7 +26,6 @@ import net.fabricmc.loader.impl.discovery.ModSolver.InactiveReason
 import net.fabricmc.loader.impl.discovery.ModSolver.solve
 import net.fabricmc.loader.impl.discovery.ResultAnalyzer.gatherErrors
 import net.fabricmc.loader.impl.discovery.ResultAnalyzer.gatherWarnings
-import net.fabricmc.loader.impl.metadata.ModDependencyImpl
 import net.fabricmc.loader.impl.util.log.Log
 import net.fabricmc.loader.impl.util.log.Log.debug
 import net.fabricmc.loader.impl.util.log.Log.warn

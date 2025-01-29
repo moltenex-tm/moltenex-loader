@@ -20,6 +20,7 @@ package net.fabricmc.loader.impl.game.minecraft
 import com.moltenex.loader.impl.MoltenexLoaderImpl
 import com.moltenex.loader.impl.launch.MappingConfiguration
 import com.moltenex.loader.impl.launch.MoltenexLauncher
+import com.moltenex.loader.impl.metadata.fabric.common.ModDependencyImpl
 import net.fabricmc.api.EnvType
 import net.fabricmc.loader.api.ObjectShare
 import net.fabricmc.loader.api.VersionParsingException
@@ -38,7 +39,6 @@ import net.fabricmc.loader.impl.game.minecraft.patch.EntrypointPatchFML125
 import net.fabricmc.loader.impl.game.minecraft.patch.TinyFDPatch
 import net.fabricmc.loader.impl.game.patch.GameTransformer
 import net.fabricmc.loader.impl.metadata.BuiltinModMetadata
-import net.fabricmc.loader.impl.metadata.ModDependencyImpl
 import net.fabricmc.loader.impl.util.Arguments
 import net.fabricmc.loader.impl.util.ExceptionUtil.wrap
 import net.fabricmc.loader.impl.util.LoaderUtil.hasMacOs

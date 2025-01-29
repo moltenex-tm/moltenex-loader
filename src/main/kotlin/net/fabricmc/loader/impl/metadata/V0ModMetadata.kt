@@ -19,6 +19,7 @@ package net.fabricmc.loader.impl.metadata
 
 import net.fabricmc.api.EnvType
 import com.moltenex.loader.api.util.version.Version
+import com.moltenex.loader.impl.metadata.fabric.v0.Mixins
 import net.fabricmc.loader.api.metadata.*
 import java.util.*
 
@@ -162,14 +163,6 @@ internal class V0ModMetadata(// Required
     override val accessWidener: String?
         get() = null // intentional null
 
-    internal class Mixins(client: Collection<String?>, common: Collection<String?>, server: Collection<String?>) {
-        val client: Collection<String?> =
-            Collections.unmodifiableCollection(client)
-        val common: Collection<String?> =
-            Collections.unmodifiableCollection(common)
-        val server: Collection<String?> =
-            Collections.unmodifiableCollection(server)
-    }
 
     companion object {
         private val EMPTY_MIXINS = Mixins(emptyList<String>(), emptyList<String>(), emptyList<String>())

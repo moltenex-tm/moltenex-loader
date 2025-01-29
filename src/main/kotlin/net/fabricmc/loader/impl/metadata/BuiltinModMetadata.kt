@@ -19,6 +19,7 @@ package net.fabricmc.loader.impl.metadata
 
 import com.moltenex.loader.api.util.version.Version
 import com.moltenex.loader.api.util.version.Version.Companion.parse
+import com.moltenex.loader.impl.metadata.fabric.common.ContactInformationImpl
 import net.fabricmc.loader.api.VersionParsingException
 import net.fabricmc.loader.api.metadata.*
 import java.util.*

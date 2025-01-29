@@ -15,15 +15,27 @@
  * please refer to the full License document.
  *
 */
-package net.fabricmc.loader.impl.metadata
+package com.moltenex.loader.impl.metadata.fabric.v0
 
+import com.moltenex.loader.impl.metadata.fabric.common.ModDependencyImpl
+import kotlinx.serialization.Serializable
 import net.fabricmc.loader.api.metadata.ContactInformation
+import net.fabricmc.loader.api.metadata.ModEnvironment
 import net.fabricmc.loader.api.metadata.Person
 
-/**
- * Represents a simple implementation of person which is only identified by name.
- */
-open class SimplePerson(override val name: String) : Person {
-    override val contact: ContactInformation
-        get() = ContactInformation.EMPTY
-}
+@Serializable
+data class ModMetadata(
+    val id: String,
+    val version: String,
+    val dependencies: List<ModDependencyImpl> = emptyList(),
+    val mixins: Mixins? = null,
+    val environment: ModEnvironment = ModEnvironment.UNIVERSAL,
+    val initializer: String? = null,
+    val initializers: List<String> = emptyList(),
+    val name: String? = null,
+    val description: String? = null,
+    val authors: List<Person> = emptyList(),
+    val contributors: List<Person> = emptyList(),
+    val links: ContactInformation = ContactInformation.EMPTY,
+    val license: String? = null
+)

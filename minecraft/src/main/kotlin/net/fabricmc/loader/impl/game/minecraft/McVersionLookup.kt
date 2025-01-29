@@ -19,8 +19,8 @@ package net.fabricmc.loader.impl.game.minecraft
 
 import com.moltenex.loader.impl.MoltenexLoaderImpl
 import net.fabricmc.loader.api.VersionParsingException
-import com.beust.klaxon.Klaxon
-import com.beust.klaxon.JsonObject
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonObject
 import java.io.InputStream
 import java.io.InputStreamReader
 import net.fabricmc.loader.impl.util.ExceptionUtil.wrap
@@ -181,43 +181,16 @@ object McVersionLookup {
         builder.setFromFileName(cp.paths[0]?.fileName.toString())
     }
 
-    private fun fromVersionJson(`is`: InputStream, builder: McVersion.Builder): Boolean {
-        try {
-            // Using Klaxon to parse the JSON into a JsonObject
-            val json = Klaxon().parse<JsonObject>(InputStreamReader(`is`))
-
-            // Check if JSON was parsed correctly
+    fun fromVersionJson(`is`: InputStream, builder: McVersion.Builder): Boolean {
+        return try {
+            val json = Json.parseToJsonElement(InputStreamReader(`is`).readText()) as? JsonObject
             if (json == null) return false
 
-            val id = json.string("id")
-            val name = json.string("name")
-            val release = json.string("release_target")
-
-            // Handle the logic for version assignment
-            val version = if (name == null || (id != null && id.length < name.length)) {
-                id
-            } else {
-                name
-            }
-
-            if (version == null) return false
-
-            // Populate the builder
-            builder.setId(id)
-            builder.setName(name)
-
-            if (release == null) {
-                builder.setNameAndRelease(version)
-            } else {
-                builder.setVersion(version)
-                builder.setRelease(release)
-            }
-            return true
+            McVersion.fromJson(json, builder)
         } catch (e: Exception) {
             e.printStackTrace()
+            false
         }
-
-        return false
     }
 
 

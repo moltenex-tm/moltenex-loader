@@ -24,6 +24,4 @@ if (!JavaVersion.current().isCompatibleWith(JavaVersion.VERSION_17)) {
 // Defining the subprojects included in the build.
 include("minecraft")  // The main project related to Minecraft.
 include("junit")      // Subproject for unit tests.
-include("json")
-include("json:jackson")
 //include("minecraft:minecraft-test")  // Nested project for Minecraft-specific tests.
